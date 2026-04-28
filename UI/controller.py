@@ -8,7 +8,7 @@ class Controller:
         # the model, which implements the logic of the program and holds the data
         self._model = model
 
-    def handleCreaGrafo(self,e):
+    def handleCreaGrafo(self,e): #chiamare funzione istanziata nel modello
         pass
 
     def handleCercaRaggiungibili(self,e):
