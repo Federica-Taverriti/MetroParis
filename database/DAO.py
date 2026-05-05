@@ -69,3 +69,24 @@ class DAO():
         conn.close()
         return result
 
+    @staticmethod
+    def getAllEdgesPesati():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT id_stazP, id_stazA, count(*) as peso
+                 FROM connessione c
+                 group by id_stazP, id_stazA 
+                 order by peso desc"""
+
+        cursor.execute(query)
+
+        for row in cursor: #creo tupla e nel modello creo metodo per delegare alla query sql il calcolo del peso
+            result.append((row["id_stazP"], row["id_stazA"], row["peso"]))
+
+        cursor.close()
+        conn.close()
+        return result
+
