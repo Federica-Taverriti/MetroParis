@@ -80,11 +80,33 @@ class DAO():
                  FROM connessione c
                  group by id_stazP, id_stazA 
                  order by peso desc"""
-
+        #legge tutte le connessioni
         cursor.execute(query)
 
         for row in cursor: #creo tupla e nel modello creo metodo per delegare alla query sql il calcolo del peso
             result.append((row["id_stazP"], row["id_stazA"], row["peso"]))
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getAllEdgesVelocita():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT c.id_stazP, c.id_stazA, max(l.velocita) as v
+                    FROM connessione c, linea l
+                    WHERE l.id_linea = c.id_linea 
+                    group by c.id_stazP, c.id_stazA 
+                    order by v asc"""
+
+        cursor.execute(query)
+
+        for row in cursor:
+            result.append((row["id_stazP"], row["id_stazA"], row["v"]))
 
         cursor.close()
         conn.close()

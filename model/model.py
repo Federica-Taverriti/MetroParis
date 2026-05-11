@@ -1,6 +1,16 @@
+import geopy.distance
+
 from database.DAO import DAO
 import networkx as nx
 from datetime import datetime
+
+
+def getPesoTempoPercorrenza(u, v, vel):
+    dist = geopy.distance.distance((u.coordX, u.coordY), (v.coordX, v.coordY)).km
+    #calcola distanza su sfera, prende come argomento 2 tuple
+
+    time = dist/vel * 60 #minuti
+    return time
 
 class Model:
     def __init__(self):
@@ -11,10 +21,25 @@ class Model:
         for f in self._fermate:
             self._idMapFermate[f.id_fermata] = f #dato id_fermato ritorno il tipo Fermata corrispondente
 
+    def getShortestPath(self, u, v):
+        return nx.single_source_dijkstra(self._grafo, u, v)
+
     def buildGraphPesato(self):
         self._grafo.clear()
         self._grafo.add_nodes_from(self._fermate)
-        self.addEdgesPesati()
+        #self.addEdgesPesati()
+        self.addEdgesPesatiTempi()
+
+    def addEdgesPesatiTempi(self):
+        """Questo metodo crea degli archi, in cui il peso è pari al tempo di percorrenza di quell'arco,
+        ottenuto come rapporto fra la disanza fra due stazioni e la velocità di percorrenza"""
+        self._grafo.clear_edges()
+        allEdgesVel = DAO.getAllEdgesVelocita()
+        for e in allEdgesVel:
+            u = self._idMapFermate[e[0]]
+            v = self._idMapFermate[e[1]]
+            peso = getPesoTempoPercorrenza(u, v, e[2])
+            self._grafo.add_edge(u, v, weight = peso)
 
     def addEdgesPesati(self):
         #riutilizzare il principio di funzionamento del metodo addedges3
